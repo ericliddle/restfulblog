@@ -31,6 +31,7 @@ app.get("/", (req, res) => {
   res.redirect("/blogs")
 })
 
+// Index Route
 app.get("/blogs", (req, res) => {
   Blog.find({}, (err, blogs) => {
     if (err) {
@@ -40,6 +41,26 @@ app.get("/blogs", (req, res) => {
     }
   })
 })
+
+// New post route
+app.get("/blogs/new", (req, res) => {
+  res.render("new");
+})
+
+// Create Route
+app.post("/blogs", (req, res) => {
+  Blog.create(req.body.blog, (err, newBlog) => {
+    if (err) {
+      req.render("new");
+    } else {
+      res.redirect("/blogs")
+    }
+  })
+})
+
+//   title: "Test blog",
+//   image: "https://images.unsplash.com/photo-1511468752539-facd2a2dff50?ixlib=rb-0.3.5&s=56b779b5d40051bfc60d8b59683d3664&auto=format&fit=crop&w=1350&q=80",
+//   body: "This is the test blog."
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000.")
