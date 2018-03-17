@@ -1,5 +1,6 @@
-const bodyParser = require("body-parser");
-mongoose = require("mongoose"),
+const bodyParser = require("body-parser"),
+  methodOverride = require("method-override"),
+  mongoose = require("mongoose"),
   express = require("express"),
   app = express(),
   moment = require('moment');
@@ -8,11 +9,8 @@ mongoose = require("mongoose"),
 mongoose.connect("mongodb://localhost/restfulblog");
 app.set("view engine", "ejs");
 app.use(express.static("public"));
-app.use(bodyParser.urlencoded({ extended: true }))
-
-// var date = '2015-04-03';
-// var format = 'LLLL';
-// var result = moment(date).format(format);
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(methodOverride("_method"));
 
 //Mongoose Model Config
 const blogSchema = new mongoose.Schema({
@@ -21,7 +19,7 @@ const blogSchema = new mongoose.Schema({
   // image: {type: String, default: "placeholderimg.jpg"},
   body: String,
   // created: { type: Date, default: Date.now() },
-  created: { type: String, default: moment()},
+  created: { type: String, default: moment() },
 });
 const Blog = mongoose.model("Blog", blogSchema);
 
@@ -40,7 +38,7 @@ app.get("/", (req, res) => {
 app.get("/blogs", (req, res) => {
   Blog.find({}, (err, blogs) => {
     if (err) {
-      console.log("Ya da fucked up.");
+      console.log("No blogs.");
     } else {
       res.render("index", { blogs: blogs });
     }
@@ -70,9 +68,32 @@ app.get("/blogs/:id", (req, res) => {
     } else {
       res.render("show", { blog: blogPost })
     }
-    // res.send("Balls.")
   })
 })
+
+app.get("/blogs/:id/edit", (req, res) => {
+  Blog.findById(req.params.id, (err, foundBlog) => {
+    if (err) {
+      res.redirect("/blogs")
+    } else {
+      res.render("edit", { blog: foundBlog })
+    }
+  });
+});
+
+// Update
+app.put("/blogs/:id", (req, res) => {
+  Blog.findByIdAndUpdate(req.params.id, req.body.blog, (err, updatedBlog) => {
+    if(err) {
+      res.redirect("/blogs");
+    } else {
+      res.redirect("/blogs/" + req.params.id);
+    }
+  })
+})
+
+
+
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000.")
