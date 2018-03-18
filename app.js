@@ -1,4 +1,5 @@
 const bodyParser = require("body-parser"),
+  experssSanitzer = require("express-sanitizer");
   methodOverride = require("method-override"),
   mongoose = require("mongoose"),
   express = require("express"),
@@ -10,6 +11,8 @@ mongoose.connect("mongodb://localhost/restfulblog");
 app.set("view engine", "ejs");
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: true }));
+//express sanitizer used after body perser.. why?
+app.use(experssSanitzer())
 app.use(methodOverride("_method"));
 
 //Mongoose Model Config
@@ -52,6 +55,8 @@ app.get("/blogs/new", (req, res) => {
 
 // Create Route
 app.post("/blogs", (req, res) => {
+  // Prevents a user from entering scripts in body of blog post
+  req.blog.blog.boy = req.sanitize(req.blog.blog.body)
   Blog.create(req.body.blog, (err, newBlog) => {
     if (err) {
       req.render("new");
@@ -68,8 +73,8 @@ app.get("/blogs/:id", (req, res) => {
     } else {
       res.render("show", { blog: blogPost })
     }
-  })
-})
+  });
+});
 
 app.get("/blogs/:id/edit", (req, res) => {
   Blog.findById(req.params.id, (err, foundBlog) => {
@@ -83,14 +88,15 @@ app.get("/blogs/:id/edit", (req, res) => {
 
 // Update
 app.put("/blogs/:id", (req, res) => {
+  req.blog.blog.boy = req.sanitize(req.blog.blog.body);
   Blog.findByIdAndUpdate(req.params.id, req.body.blog, (err, updatedBlog) => {
     if(err) {
       res.redirect("/blogs");
     } else {
       res.redirect("/blogs/" + req.params.id);
     }
-  })
-})
+  });
+});
 
 // Delete
 app.delete("/blogs/:id", (req, res) => {
@@ -100,11 +106,11 @@ app.delete("/blogs/:id", (req, res) => {
     } else {
       res.redirect("/blogs")
     }
-  })
-})
+  });
+});
 
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000.")
-})
+});
 
