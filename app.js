@@ -92,7 +92,16 @@ app.put("/blogs/:id", (req, res) => {
   })
 })
 
-
+// Delete
+app.delete("/blogs/:id", (req, res) => {
+  Blog.findByIdAndRemove(req.params.id, (err) => {
+    if(err) {
+      req.redirect("/blogs")
+    } else {
+      res.redirect("/blogs")
+    }
+  })
+})
 
 
 app.listen(3000, () => {
